@@ -19,6 +19,7 @@ class Program extends React.Component {
     }
 
     async handleStart(){
+        console.log('start')
         this.setState({start: true, title: "Loading..."})
 
         let datasetId = await axios.get('https://api.coxauto-interview.com/api/datasetId')
