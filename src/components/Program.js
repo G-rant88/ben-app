@@ -21,7 +21,7 @@ class Program extends React.Component {
     async handleStart(){
         this.setState({start: true, title: "Loading..."})
 
-        let datasetId = await axios.get('http://api.coxauto-interview.com/api/datasetId')
+        let datasetId = await axios.get('https://api.coxauto-interview.com/api/datasetId')
         .then(function (response) {
             return response.data;
         })
@@ -32,7 +32,7 @@ class Program extends React.Component {
         this.setState({datasetId: datasetId.datasetId})
         console.log(this.state.datasetId)
 
-        let vehicleIds = await axios.get(`http://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles`)
+        let vehicleIds = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles`)
         .then(function (response) {
             return response.data;
         })
@@ -44,7 +44,7 @@ class Program extends React.Component {
         console.log(this.state.vehicleIds)
         
         for(let vehicleId of this.state.vehicleIds){
-            let vehicles = await axios.get(`http://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
+            let vehicles = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
             .then(function (response) {
                 return response.data;
             })
@@ -63,7 +63,7 @@ class Program extends React.Component {
         }
 
         for(let dealerId of this.state.dealerIds){
-            let dealers = await axios.get(`http://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${dealerId}`)
+            let dealers = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${dealerId}`)
             .then(function (response) {
                 return response.data;
             })
@@ -91,7 +91,7 @@ class Program extends React.Component {
             dealers: this.state.dealersAnswer
         }
 
-        let answer = await axios.post(`http://api.coxauto-interview.com/api/${this.state.datasetId}/answer`, postObj)
+        let answer = await axios.post(`https://api.coxauto-interview.com/api/${this.state.datasetId}/answer`, postObj)
         .then(function (response) {
             return response.data;
         })
