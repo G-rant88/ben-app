@@ -30,6 +30,7 @@ class Program extends React.Component {
         })
 
         this.setState({datasetId: datasetId.datasetId})
+        console.log(this.state.datasetId)
 
         let vehicleIds = await axios.get(`http://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles`)
         .then(function (response) {
@@ -40,6 +41,7 @@ class Program extends React.Component {
         })
 
         this.setState({vehicleIds: vehicleIds.vehicleIds})
+        console.log(this.state.vehicleIds)
         
         for(let vehicleId of this.state.vehicleIds){
             let vehicles = await axios.get(`http://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
@@ -51,6 +53,8 @@ class Program extends React.Component {
             })
             this.setState({ vehicles: [...this.state.vehicles, vehicles] })
         }
+
+        console.log(this.state.vehicles)
 
         for(let vehicle of this.state.vehicles){
             if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
@@ -69,6 +73,8 @@ class Program extends React.Component {
             this.setState({ dealers: [...this.state.dealers, dealers] })
         }
 
+        console.log(this.state.dealers)
+
         for(let dealer of this.state.dealers){
             let vehicles = this.state.vehicles.filter(vehilce => vehilce.dealerId === dealer.dealerId);
             let dealerObj = {
@@ -78,6 +84,8 @@ class Program extends React.Component {
             }
             this.setState({ dealersAnswer: [...this.state.dealersAnswer, dealerObj] })
         }
+
+        console.log(this.state.dealersAnswer)
 
         let postObj = {
             dealers: this.state.dealersAnswer
