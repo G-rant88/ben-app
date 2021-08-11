@@ -12,7 +12,9 @@ class Program extends React.Component {
         dealerIds: [],
         dealers: [],
         dealersAnswer: [],
-        answer: 'Loading...'
+        answer: 'Loading...',
+        success: '',
+        message: ''
       };
 
       this.handleStart = this.handleStart.bind(this);
@@ -103,7 +105,9 @@ class Program extends React.Component {
         })
 
         let answerStr = `Total Milliseconds: ${answer.totalMilliseconds}`;
-        this.setState({answer: answerStr})
+        let successStr = `Success: ${answer.success}`;
+        let messageStr = `Message: ${answer.message}`;
+        this.setState({answer: answerStr, success: successStr, message: messageStr})
 
     }
   
@@ -111,7 +115,11 @@ class Program extends React.Component {
       return (
         <div>
             { this.state.start ? 
+            <div>
+                <h2>{this.state.success}</h2>
+                <h2>{this.state.message}</h2>
                 <h2>{this.state.answer}</h2> 
+            </div>
             : 
                 <button onClick={this.handleStart}>Start Program</button>
             }
