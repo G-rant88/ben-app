@@ -8,6 +8,7 @@ class Program extends React.Component {
         start: false,
         resultsTitle: "Program Results"
       };
+      
       this.handleStart = this.handleStart.bind(this);
     }
 
