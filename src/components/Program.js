@@ -64,6 +64,7 @@ class Program extends React.Component {
             }
         }
 
+        console.log('dealerIds', this.state.dealerIds)
         this.setState({answer: "Getting dealers..."})
 
         for(let dealerId of this.state.dealerIds){
