@@ -11,13 +11,15 @@ class Program extends React.Component {
         vehicles: [],
         dealerIds: [],
         dealers: [],
-        dealersAnswer: [],
         answer: 'Loading...',
         success: '',
-        message: ''
+        message: '',
+        hasRun: false
       };
 
       this.handleStart = this.handleStart.bind(this);
+      this.runInterval = this.runInterval.bind(this);
+      this.runAnswer = this.runAnswer.bind(this);
     }
 
     async handleStart(){
@@ -32,38 +34,47 @@ class Program extends React.Component {
         .then((response) => response.data)
 
         this.setState({vehicleIds: vehicleIds.vehicleIds, answer: "Getting vehicles and dealers..."})
+        let self = this;
+        setInterval(self.runInterval, 100);
         
         for(let vehicleId of this.state.vehicleIds){
-            let vehicle = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
-            .then((response) => response.data)
-
-            if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
-                this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId] })
-                let dealer = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${vehicle.dealerId}`)
+            if(this.state.dealerIds.length < 3){
+                let vehicle = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
                 .then((response) => response.data)
-                this.setState({ dealers: [...this.state.dealers, dealer] })
+                if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
+                    this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId] })
+                    axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${vehicle.dealerId}`)
+                    .then((response) => {                 
+                        this.setState({ dealers: [...this.state.dealers, response.data] })
+                    })
+                    this.setState({ vehicles: [...this.state.vehicles, vehicle] })
+                }
             }
-            this.setState({ vehicles: [...this.state.vehicles, vehicle] })
+            else{
+                axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
+                .then((response) => {
+                    this.setState({ vehicles: [...this.state.vehicles, response.data] })
+                })
+            }
         }
+    }
 
-        console.log('vehicles', this.state.vehicles)
-        console.log('dealers', this.state.dealers)
+    runInterval(){
+        if(this.state.vehicleIds.length === this.state.vehicles.length && this.state.hasRun === false){
+            this.setState({ hasRun: true })
+            this.runAnswer();
+        }
+    }
+
+    async runAnswer(){
         this.setState({answer: "Posting answer..."})
-
         for(let dealer of this.state.dealers){
             let vehicles = this.state.vehicles.filter(vehilce => vehilce.dealerId === dealer.dealerId);
-            let dealerObj = {
-                dealerId: dealer.dealerId,
-                name: dealer.name,
-                vehicles: vehicles
-            }
-            this.setState({ dealersAnswer: [...this.state.dealersAnswer, dealerObj] })
+            dealer.vehicles = vehicles;
         }
 
-        console.log('dealersAnswer', this.state.dealersAnswer)
-
         let postObj = {
-            dealers: this.state.dealersAnswer
+            dealers: this.state.dealers
         }
 
         let answer = await axios.post(`https://api.coxauto-interview.com/api/${this.state.datasetId}/answer`, postObj)
