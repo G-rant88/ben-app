@@ -35,19 +35,18 @@ class Program extends React.Component {
 
         this.setState({vehicleIds: vehicleIds.vehicleIds, answer: "Getting vehicles and dealers..."})
         let self = this;
-        setInterval(self.runInterval, 100);
+        setInterval(self.runInterval, 200);
         
         for(let vehicleId of this.state.vehicleIds){
             if(this.state.dealerIds.length < 3){
                 let vehicle = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
                 .then((response) => response.data)
                 if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
-                    this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId] })
+                    this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId], vehicles: [...this.state.vehicles, vehicle] })
                     axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${vehicle.dealerId}`)
                     .then((response) => {                 
                         this.setState({ dealers: [...this.state.dealers, response.data] })
                     })
-                    this.setState({ vehicles: [...this.state.vehicles, vehicle] })
                 }
             }
             else{
