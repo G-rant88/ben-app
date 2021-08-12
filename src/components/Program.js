@@ -21,64 +21,34 @@ class Program extends React.Component {
     }
 
     async handleStart(){
-        this.setState({start: true, answer: "Getting DatasetId..."})
+        this.setState({start: true, answer: "Getting datasetId..."})
 
         let datasetId = await axios.get('https://api.coxauto-interview.com/api/datasetId')
-        .then(function (response) {
-            return response.data;
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        .then((response) => response.data);
 
         this.setState({datasetId: datasetId.datasetId, answer: "Getting vehicleIds..."})
-        console.log('datasetId', this.state.datasetId)
 
         let vehicleIds = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles`)
-        .then(function (response) {
-            return response.data;
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        .then((response) => response.data)
 
-        this.setState({vehicleIds: vehicleIds.vehicleIds, answer: "Getting vehicles..."})
-        console.log('vehicleIds', this.state.vehicleIds)
+        this.setState({vehicleIds: vehicleIds.vehicleIds, answer: "Getting vehicles and dealers..."})
         
         for(let vehicleId of this.state.vehicleIds){
-            let vehicles = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
-            .then(function (response) {
-                return response.data;
-            })
-            .catch(function (error) {
-                console.log(error);
-            })
-            this.setState({ vehicles: [...this.state.vehicles, vehicles] })
+            let vehicle = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
+            .then((response) => response.data)
+
+            if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
+                this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId] })
+                let dealer = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${vehicle.dealerId}`)
+                .then((response) => response.data)
+                this.setState({ dealers: [...this.state.dealers, dealer] })
+            }
+            this.setState({ vehicles: [...this.state.vehicles, vehicle] })
         }
 
         console.log('vehicles', this.state.vehicles)
-
-        for(let vehicle of this.state.vehicles){
-            if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
-                this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId] })
-            }
-        }
-
-        console.log('dealerIds', this.state.dealerIds)
-        this.setState({answer: "Getting dealers..."})
-
-        for(let dealerId of this.state.dealerIds){
-            let dealers = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${dealerId}`)
-            .then(function (response) {
-                return response.data;
-            })
-            .catch(function (error) {
-                console.log(error);
-            })
-            this.setState({ dealers: [...this.state.dealers, dealers] })
-        }
-
         console.log('dealers', this.state.dealers)
+        this.setState({answer: "Posting answer..."})
 
         for(let dealer of this.state.dealers){
             let vehicles = this.state.vehicles.filter(vehilce => vehilce.dealerId === dealer.dealerId);
@@ -91,25 +61,18 @@ class Program extends React.Component {
         }
 
         console.log('dealersAnswer', this.state.dealersAnswer)
-        this.setState({answer: "Posting answer..."})
 
         let postObj = {
             dealers: this.state.dealersAnswer
         }
 
         let answer = await axios.post(`https://api.coxauto-interview.com/api/${this.state.datasetId}/answer`, postObj)
-        .then(function (response) {
-            return response.data;
-        })
-        .catch(function (error) {
-            console.log(error);
-        })
+        .then((response) => response.data)
 
         let answerStr = `Total Milliseconds: ${answer.totalMilliseconds}`;
         let successStr = `Success: ${answer.success}`;
         let messageStr = `Message: ${answer.message}`;
         this.setState({answer: answerStr, success: successStr, message: messageStr})
-
     }
   
     render() {
