@@ -18,7 +18,6 @@ class Program extends React.Component {
       };
 
       this.handleStart = this.handleStart.bind(this);
-      this.runInterval = this.runInterval.bind(this);
       this.runAnswer = this.runAnswer.bind(this);
     }
 
@@ -34,34 +33,28 @@ class Program extends React.Component {
         .then((response) => response.data)
 
         this.setState({vehicleIds: vehicleIds.vehicleIds, answer: "Getting vehicles and dealers..."})
-        let self = this;
-        setInterval(self.runInterval, 200);
         
         for(let vehicleId of this.state.vehicleIds){
-            if(this.state.dealerIds.length < 3){
-                let vehicle = await axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
-                .then((response) => response.data)
+            axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
+            .then((response) => {
+                let vehicle = response.data;
                 if(this.state.dealerIds.indexOf(vehicle.dealerId) < 0){
-                    this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId], vehicles: [...this.state.vehicles, vehicle] })
+                    this.setState({ dealerIds: [...this.state.dealerIds, vehicle.dealerId] })
                     axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/dealers/${vehicle.dealerId}`)
                     .then((response) => {                 
                         this.setState({ dealers: [...this.state.dealers, response.data] })
+                        if(this.state.vehicles.length === 9 && this.state.dealers.length === 3 && this.state.hasRun === false){
+                            this.setState({ hasRun: true })
+                            this.runAnswer();
+                        }
                     })
                 }
-            }
-            else{
-                axios.get(`https://api.coxauto-interview.com/api/${this.state.datasetId}/vehicles/${vehicleId}`)
-                .then((response) => {
-                    this.setState({ vehicles: [...this.state.vehicles, response.data] })
-                })
-            }
-        }
-    }
-
-    runInterval(){
-        if(this.state.vehicleIds.length === this.state.vehicles.length && this.state.hasRun === false){
-            this.setState({ hasRun: true })
-            this.runAnswer();
+                this.setState({ vehicles: [...this.state.vehicles, vehicle] })
+                if(this.state.vehicles.length === 9 && this.state.dealers.length === 3 && this.state.hasRun === false){
+                    this.setState({ hasRun: true })
+                    this.runAnswer();
+                }
+            }) 
         }
     }
 
